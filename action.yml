@@ -1,0 +1,174 @@
+name: 'Update Taiga Tasks'
+description: 'Automatically update Taiga tasks based on commit message format'
+author: 'lauacosta'
+
+inputs:
+  taiga-username:
+    description: 'Taiga username'
+    required: true
+  taiga-password:
+    description: 'Taiga password'
+    required: true
+  project-name:
+    description: 'Taiga project name'
+    required: true
+  backlogr-version:
+    description: 'Version of backlogr to use'
+    required: false
+    default: 'v0.5.0'
+  commit-message:
+    description: 'Custom commit message to parse (defaults to latest commit)'
+    required: false
+    default: ''
+
+outputs:
+  task-id:
+    description: 'The task ID that was processed'
+    value: ${{ steps.parse.outputs.task_id }}
+  action-taken:
+    description: 'The action that was taken (wip, done, delete, or skipped)'
+    value: ${{ steps.execute.outputs.action }}
+  success:
+    description: 'Whether the action was successful'
+    value: ${{ steps.execute.outputs.success }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Get commit message
+      id: commit
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.commit-message }}" ]; then
+          MSG="${{ inputs.commit-message }}"
+        elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          MSG=$(git log --format=%B -n 1 ${{ github.event.pull_request.head.sha }})
+        else
+          MSG="${{ github.event.head_commit.message }}"
+        fi
+        
+        MSG=$(echo "$MSG" | head -n 1 | tr -d '\n\r')
+        echo "message=$MSG" >> $GITHUB_OUTPUT
+        echo "🔍 Commit message: $MSG"
+
+    - name: Parse commit message
+      id: parse
+      shell: bash
+      run: |
+        MSG="${{ steps.commit.outputs.message }}"
+        
+        if [[ "$MSG" =~ ^([^:]+):[[:space:]]*(.+)[[:space:]]*\(#([0-9]+)\)$ ]]; then
+          MOD="${BASH_REMATCH[1]}"
+          MESSAGE="${BASH_REMATCH[2]}"
+          TASK_ID="${BASH_REMATCH[3]}"
+          
+          echo "mod=$MOD" >> $GITHUB_OUTPUT
+          echo "message=$MESSAGE" >> $GITHUB_OUTPUT
+          echo "task_id=$TASK_ID" >> $GITHUB_OUTPUT
+          echo "valid=true" >> $GITHUB_OUTPUT
+          
+          echo "✅ Parsed commit successfully:"
+          echo "   📝 Modifier: $MOD"
+          echo "   💬 Message: $MESSAGE"
+          echo "   🔗 Task ID: #$TASK_ID"
+        else
+          echo "valid=false" >> $GITHUB_OUTPUT
+          echo "❌ Invalid commit format."
+          echo "ℹ️  Expected: <modifier>: <message> (#<task-id>)"
+          echo "ℹ️  Examples:"
+          echo "     feat: add user authentication (#123)"
+          echo "     fix: resolve login bug (#456)"
+          echo "     done: complete user profile (#789)"
+        fi
+
+    - name: Install backlogr
+      if: steps.parse.outputs.valid == 'true'
+      shell: bash
+      run: |
+        VERSION="${{ inputs.backlogr-version }}"
+        URL="https://github.com/lauacosta/backlogr/releases/download/${VERSION}/backlogr-${VERSION}-x86_64-unknown-linux-musl.tar.gz"
+        
+        echo "📦 Installing backlogr ${VERSION}..."
+        
+        if command -v backlogr >/dev/null 2>&1; then
+          echo "✅ backlogr already installed: $(backlogr --version)"
+        else
+          curl -fsSL "$URL" | tar xz
+          sudo mv backlogr-${VERSION}-x86_64-unknown-linux-musl/backlogr /usr/local/bin/
+          chmod +x /usr/local/bin/backlogr
+          
+          if command -v backlogr >/dev/null 2>&1; then
+            echo "✅ backlogr installed: $(backlogr --version)"
+          else
+            echo "❌ Failed to install backlogr"
+            exit 1
+          fi
+        fi
+
+    - name: Execute backlogr command
+      if: steps.parse.outputs.valid == 'true'
+      id: execute
+      shell: bash
+      env:
+        TAIGA_USERNAME: ${{ inputs.taiga-username }}
+        TAIGA_PASSWORD: ${{ inputs.taiga-password }}
+        PROJECT_NAME: ${{ inputs.project-name }}
+      run: |
+        set -e
+        
+        MOD="${{ steps.parse.outputs.mod }}"
+        MESSAGE="${{ steps.parse.outputs.message }}"
+        TASK_ID="${{ steps.parse.outputs.task_id }}"
+        
+        MOD_LC=$(echo "$MOD" | tr '[:upper:]' '[:lower:]')
+        case "$MOD_LC" in
+          feat|feature|add|implement)
+            CMD="wip"
+            DESC="Moving to 'In Progress'"
+            ;;
+          fix|bugfix|patch|hotfix)
+            CMD="wip"
+            DESC="Moving to 'In Progress' (fixing)"
+            ;;
+          done|complete|finish|resolve)
+            CMD="done"
+            DESC="Moving to 'Done'"
+            ;;
+          delete|remove|cancel|drop)
+            CMD="delete"
+            DESC="Deleting task"
+            ;;
+          wip|progress|start|begin)
+            CMD="wip"
+            DESC="Moving to 'In Progress'"
+            ;;
+          *)
+            echo "⚠️  Unknown modifier '$MOD'. Supported:"
+            echo "    • feat, feature, add, implement → WIP"
+            echo "    • fix, bugfix, patch, hotfix → WIP"
+            echo "    • done, complete, finish, resolve → Done"
+            echo "    • delete, remove, cancel, drop → Delete"
+            echo "    • wip, progress, start, begin → WIP"
+            echo "action=skipped" >> $GITHUB_OUTPUT
+            echo "success=false" >> $GITHUB_OUTPUT
+            exit 0
+            ;;
+        esac
+        
+        echo "🚀 $DESC task #$TASK_ID..."
+        
+        if backlogr --username "$TAIGA_USERNAME" --password "$TAIGA_PASSWORD" --project_name "$PROJECT_NAME" "$CMD" "$TASK_ID"; then
+          echo "✅ Success: $DESC"
+          echo "📝 Message: $MESSAGE"
+          echo "action=$CMD" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Failed to execute backlogr command"
+          echo "action=failed" >> $GITHUB_OUTPUT
+          echo "success=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+branding:
+  icon: 'git-commit'
+  color: 'blue'
