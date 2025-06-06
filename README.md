@@ -40,7 +40,7 @@ Get up and running in 30 seconds:
          - uses: actions/checkout@v4
            with:
              fetch-depth: 0 # Required to access full git history for commit parsing
-         - uses: lauacosta/backlogr-action@v0.0.1
+         - uses: lauacosta/backlogr-action@v0.0.2
            with:
              taiga-username: ${{ secrets.TAIGA_USERNAME }}
              taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -80,7 +80,7 @@ jobs:
           fetch-depth: 0 # Required to access full git history for commit parsing
                 
       - name: Update Taiga User Story
-        uses: lauacosta/backlogr-action@v0.0.1
+        uses: lauacosta/backlogr-action@v0.0.2
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -104,14 +104,14 @@ Set up these secrets in your repository settings:
 | `taiga-username` | Taiga username or email | ✅ | |
 | `taiga-password` | Taiga password | ✅ | |
 | `project-name` | Taiga project name | ✅ | |
-| `backlogr-version` | Version of backlogr to use | ❌ | `v0.0.1` |
+| `backlogr-version` | Version of backlogr to use | ❌ | `v0.0.2` |
 | `commit-message` | Custom commit message to parse | ❌ | (auto-detected) |
 
 ### Outputs
 
 | Output | Description | Example |
 |--------|-------------|---------|
-| `User Story-id` | The User Story ID that was processed | `123` |
+| `user-story-id` | The User Story ID that was processed | `123` |
 | `action-taken` | Action taken on the User Story | `wip`, `done`, `delete`, `skipped` |
 | `success` | Whether the action was successful | `true`, `false` |
 
@@ -138,7 +138,7 @@ permissions:
 ### Pattern
 
 ```
-<modifier>: <description> (#<User Story-id>)
+<modifier>: <description> (#<user-story-id>)
     ↑           ↑         ↑
  Action    What you did  User Story ID
 ```
@@ -191,7 +191,7 @@ jobs:
           fetch-depth: 0 # Required to access full git history for commit parsing
           
       - name: Update Taiga User Story
-        uses: lauacosta/backlogr-action@v0.0.1
+        uses: lauacosta/backlogr-action@v0.0.2
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -224,7 +224,7 @@ jobs:
 
       - name: Update Taiga User Story
         id: taiga
-        uses: lauacosta/backlogr-action@v0.0.1
+        uses: lauacosta/backlogr-action@v0.0.2
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -233,7 +233,7 @@ jobs:
       - name: Handle Success
         if: steps.taiga.outputs.success == 'true'
         run: |
-          echo "✅ Successfully updated User Story #${{ steps.taiga.outputs.User Story-id }}"
+          echo "✅ Successfully updated User Story #${{ steps.taiga.outputs.user-story-id }}"
           echo "Action taken: ${{ steps.taiga.outputs.action-taken }}"
 
       - name: Handle Failure
@@ -251,7 +251,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `✅ Taiga User Story #${{ steps.taiga.outputs.User Story-id }} updated: **${{ steps.taiga.outputs.action-taken }}**`
+              body: `✅ Taiga User Story #${{ steps.taiga.outputs.user-story-id }} updated: **${{ steps.taiga.outputs.action-taken }}**`
             })
 
       - name: Slack Notification
@@ -261,7 +261,7 @@ jobs:
           status: custom
           custom_payload: |
             {
-              "text": "User Story #${{ steps.taiga.outputs.User Story-id }} moved to ${{ steps.taiga.outputs.action-taken }}"
+              "text": "User Story #${{ steps.taiga.outputs.user-story-id }} moved to ${{ steps.taiga.outputs.action-taken }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -287,7 +287,7 @@ jobs:
           fetch-depth: 0 # Required to access full git history for commit parsing
           
       - name: Update Taiga User Story for ${{ matrix.project }}
-        uses: lauacosta/backlogr-action@v0.0.1
+        uses: lauacosta/backlogr-action@v0.0.2
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -328,7 +328,7 @@ jobs:
           fetch-depth: 0 # Required to access full git history for commit parsing
           
       - name: Update Taiga User Story
-        uses: lauacosta/backlogr-action@v0.0.1
+        uses: lauacosta/backlogr-action@v0.0.2
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -343,7 +343,7 @@ Process a specific commit message instead of auto-detecting:
 
 ```yaml
 - name: Update Taiga User Story
-  uses: lauacosta/backlogr-action@v0.0.1
+  uses: lauacosta/backlogr-action@v0.0.2
   with:
     taiga-username: ${{ secrets.TAIGA_USERNAME }}
     taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -357,12 +357,12 @@ Use a different version of the backlogr tool:
 
 ```yaml
 - name: Update Taiga User Story
-  uses: lauacosta/backlogr-action@v0.0.1
+  uses: lauacosta/backlogr-action@v0.0.2
   with:
     taiga-username: ${{ secrets.TAIGA_USERNAME }}
     taiga-password: ${{ secrets.TAIGA_PASSWORD }}
     project-name: ${{ secrets.PROJECT_NAME }}
-    backlogr-version: "v0.0.1"
+    backlogr-version: "v0.0.2"
 ```
 
 #### Error Handling and Notifications
@@ -383,7 +383,7 @@ jobs:
       
       - name: Update Taiga User Story
         id: taiga
-        uses: lauacosta/backlogr-action@v0.0.1
+        uses: lauacosta/backlogr-action@v0.0.2
         continue-on-error: true
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
@@ -393,7 +393,7 @@ jobs:
       - name: Report Status
         run: |
           if [ "${{ steps.taiga.outputs.success }}" == "true" ]; then
-            echo "✅ User Story #${{ steps.taiga.outputs.User Story-id }} → ${{ steps.taiga.outputs.action-taken }}"
+            echo "✅ User Story #${{ steps.taiga.outputs.user-story-id }} → ${{ steps.taiga.outputs.action-taken }}"
           else
             echo "❌ User Story update failed - check commit format and Taiga connection"
             exit 1
@@ -504,7 +504,7 @@ permissions:
 #### Invalid Commit Format
 ```
 ❌ Invalid commit format.
-ℹ️  Expected: <modifier>: <message> (#<User Story-id>)
+ℹ️  Expected: <modifier>: <message> (#<user-story-id>)
 ```
 **Solution**: Ensure your commit messages follow the exact format: `feat: description (#123)`
 

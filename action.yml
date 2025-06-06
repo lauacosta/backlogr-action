@@ -1,5 +1,5 @@
-name: 'Update Taiga Tasks'
-description: 'Automatically update Taiga tasks based on commit message format'
+name: 'Update Taiga user stories'
+description: 'Automatically update Taiga user stories based on commit message format'
 author: 'lauacosta'
 
 inputs:
@@ -15,16 +15,16 @@ inputs:
   backlogr-version:
     description: 'Version of backlogr to use'
     required: false
-    default: 'v0.0.1'
+    default: 'v0.0.2'
   commit-message:
     description: 'Custom commit message to parse (defaults to latest commit)'
     required: false
     default: ''
 
 outputs:
-  task-id:
-    description: 'The task ID that was processed'
-    value: ${{ steps.parse.outputs.task_id }}
+  user-story-id:
+    description: 'The user story ID that was processed'
+    value: ${{ steps.parse.outputs.user_story_id }}
   action-taken:
     description: 'The action that was taken (wip, done, delete, or skipped)'
     value: ${{ steps.execute.outputs.action }}
@@ -60,21 +60,21 @@ runs:
         if [[ "$MSG" =~ ^([^:]+):[[:space:]]*(.+)[[:space:]]*\(#([0-9]+)\)$ ]]; then
           MOD="${BASH_REMATCH[1]}"
           MESSAGE="${BASH_REMATCH[2]}"
-          TASK_ID="${BASH_REMATCH[3]}"
+          user_story_id="${BASH_REMATCH[3]}"
           
           echo "mod=$MOD" >> $GITHUB_OUTPUT
           echo "message=$MESSAGE" >> $GITHUB_OUTPUT
-          echo "task_id=$TASK_ID" >> $GITHUB_OUTPUT
+          echo "user_story_id=$user_story_id" >> $GITHUB_OUTPUT
           echo "valid=true" >> $GITHUB_OUTPUT
           
           echo "✅ Parsed commit successfully:"
           echo "   📝 Modifier: $MOD"
           echo "   💬 Message: $MESSAGE"
-          echo "   🔗 Task ID: #$TASK_ID"
+          echo "   🔗 User story ID: #$user_story_id"
         else
           echo "valid=false" >> $GITHUB_OUTPUT
           echo "❌ Invalid commit format."
-          echo "ℹ️  Expected: <modifier>: <message> (#<task-id>)"
+          echo "ℹ️  Expected: <modifier>: <message> (#<user-story-id>)"
           echo "ℹ️  Examples:"
           echo "     feat: add user authentication (#123)"
           echo "     fix: resolve login bug (#456)"
@@ -118,7 +118,7 @@ runs:
         
         MOD="${{ steps.parse.outputs.mod }}"
         MESSAGE="${{ steps.parse.outputs.message }}"
-        TASK_ID="${{ steps.parse.outputs.task_id }}"
+        user_story_id="${{ steps.parse.outputs.user_story_id }}"
         
         MOD_LC=$(echo "$MOD" | tr '[:upper:]' '[:lower:]')
         case "$MOD_LC" in
@@ -136,7 +136,7 @@ runs:
             ;;
           delete|remove|cancel|drop)
             CMD="delete"
-            DESC="Deleting task"
+            DESC="Deleting user story"
             ;;
           wip|progress|start|begin)
             CMD="wip"
@@ -155,9 +155,9 @@ runs:
             ;;
         esac
         
-        echo "🚀 $DESC task #$TASK_ID..."
+        echo "🚀 $DESC user story #$user_story_id..."
         
-        if backlogr --username "$TAIGA_USERNAME" --password "$TAIGA_PASSWORD" --project_name "$PROJECT_NAME" "$CMD" "$TASK_ID"; then
+        if backlogr --username "$TAIGA_USERNAME" --password "$TAIGA_PASSWORD" --project_name "$PROJECT_NAME" "$CMD" "$user_story_id"; then
           echo "✅ Success: $DESC"
           echo "📝 Message: $MESSAGE"
           echo "action=$CMD" >> $GITHUB_OUTPUT
