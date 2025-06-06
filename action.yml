@@ -15,7 +15,7 @@ inputs:
   backlogr-version:
     description: 'Version of backlogr to use'
     required: false
-    default: 'v0.0.2'
+    default: 'v0.0.1'
   commit-message:
     description: 'Custom commit message to parse (defaults to latest commit)'
     required: false
