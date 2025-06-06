@@ -42,7 +42,7 @@ jobs:
           fetch-depth: 2
       
       - name: Update Taiga Task
-        uses: lauacosta/backlogr-action@v1
+        uses: lauacosta/backlogr-action@v0.0.1
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -121,7 +121,7 @@ Process a specific commit message instead of auto-detecting:
 
 ```yaml
 - name: Update Taiga Task
-  uses: lauacosta/backlogr-action@v1
+  uses: lauacosta/backlogr-action@v0.0.1
   with:
     taiga-username: ${{ secrets.TAIGA_USERNAME }}
     taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -135,7 +135,7 @@ Use a different version of the backlogr tool:
 
 ```yaml
 - name: Update Taiga Task
-  uses: lauacosta/backlogr-action@v1
+  uses: lauacosta/backlogr-action@v0.0.1
   with:
     taiga-username: ${{ secrets.TAIGA_USERNAME }}
     taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -148,7 +148,7 @@ Use a different version of the backlogr tool:
 ```yaml
 - name: Update Taiga Task
   id: taiga
-  uses: lauacosta/backlogr-action@v1
+  uses: lauacosta/backlogr-action@v0.0.1
   with:
     taiga-username: ${{ secrets.TAIGA_USERNAME }}
     taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -201,7 +201,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Update Taiga Task
-        uses: lauacosta/backlogr-action@v1
+        uses: lauacosta/backlogr-action@v0.0.1
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -227,7 +227,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Update Taiga Task - ${{ matrix.project }}
-        uses: lauacosta/backlogr-action@v1
+        uses: lauacosta/backlogr-action@v0.0.1
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -267,7 +267,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Update Taiga Task
-        uses: lauacosta/backlogr-action@v1
+        uses: lauacosta/backlogr-action@v0.0.1
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
           taiga-password: ${{ secrets.TAIGA_PASSWORD }}
@@ -292,7 +292,7 @@ jobs:
       
       - name: Update Taiga Task
         id: taiga
-        uses: lauacosta/backlogr-action@v1
+        uses: lauacosta/backlogr-action@v0.0.1
         continue-on-error: true
         with:
           taiga-username: ${{ secrets.TAIGA_USERNAME }}
