@@ -1,7 +1,7 @@
 
 <div align="center">
 
-# 🏷️ Taiga Task Updater Action
+# 🏷️ Backlogr Action
 
 **GitHub Action for automatically updating [Taiga](https://taiga.io/) tasks based on commit message patterns using [`backlogr`](https://github.com/lauacosta/backlogr).**
 
