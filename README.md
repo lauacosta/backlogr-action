@@ -64,7 +64,7 @@ Set up these secrets in your repository settings:
 | `taiga-username` | Taiga username or email | ✅ | |
 | `taiga-password` | Taiga password | ✅ | |
 | `project-name` | Taiga project name | ✅ | |
-| `backlogr-version` | Version of backlogr to use | ❌ | `v0.5.0` |
+| `backlogr-version` | Version of backlogr to use | ❌ | `v0.0.1` |
 | `commit-message` | Custom commit message to parse | ❌ | (auto-detected) |
 
 ## Outputs
@@ -140,7 +140,7 @@ Use a different version of the backlogr tool:
     taiga-username: ${{ secrets.TAIGA_USERNAME }}
     taiga-password: ${{ secrets.TAIGA_PASSWORD }}
     project-name: ${{ secrets.PROJECT_NAME }}
-    backlogr-version: "v0.5.0"
+    backlogr-version: "v0.0.1"
 ```
 
 ### Using Outputs for Further Actions
