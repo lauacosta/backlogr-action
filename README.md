@@ -321,13 +321,19 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 ```
-
 ## Requirements
 
-- **Git History**: The action requires access to commit history. Use `fetch-depth: 2` or `fetch-depth: 0` in your checkout step
-- **Runner**: Compatible with `ubuntu-latest`, `ubuntu-22.04`, `ubuntu-20.04`, and `macos-latest`
-- **Internet Access**: Required to download the backlogr binary
-- **Taiga Access**: Valid Taiga credentials with access to the specified project
+- **Git History**:  
+  The action requires access to commit history. Set `fetch-depth: 2` (or `fetch-depth: 0`) in the `actions/checkout` step to ensure commit history is available.
+
+- **Runner**:  
+  - ✅ Compatible with: `ubuntu-latest`, `ubuntu-22.04`, `ubuntu-20.04`, and other Linux runners that support musl binaries.  
+
+- **Internet Access**:  
+  Required to download the Backlogr binary during the workflow run.
+
+- **Taiga Access**:  
+  Requires valid Taiga credentials with access to the specified project.
 
 ## Troubleshooting
 
